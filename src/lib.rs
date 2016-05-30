@@ -3,12 +3,14 @@
 pub use elf_sections::{ElfSectionsTag, ElfSection, ElfSectionIter, ElfSectionType, ElfSectionFlags};
 pub use elf_sections::{ELF_SECTION_WRITABLE, ELF_SECTION_ALLOCATED, ELF_SECTION_EXECUTABLE};
 pub use memory_map::{MemoryMapTag, MemoryArea, MemoryAreaIter};
+pub use modules::ModulesTag;
 
 #[macro_use]
 extern crate bitflags;
 
 mod elf_sections;
 mod memory_map;
+mod modules;
 
 pub unsafe fn load(address: usize) -> &'static BootInformation {
     let multiboot = &*(address as *const BootInformation);
@@ -38,6 +40,10 @@ impl BootInformation {
 
     pub fn memory_map_tag(&self) -> Option<&'static MemoryMapTag> {
         self.get_tag(6).map(|tag| unsafe{&*(tag as *const Tag as *const MemoryMapTag)})
+    }
+
+    pub fn modules_tag(&self) -> Option<&'static ModulesTag> {
+        self.get_tag(3).map(|tag| unsafe{&*(tag as *const Tag as *const ModulesTag)})
     }
 
     fn has_valid_end_tag(&self) -> bool {
